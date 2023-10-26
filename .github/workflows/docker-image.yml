@@ -21,21 +21,22 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create tags
-        id: create-tag
+      - name: Download latest MailHog release
         run: |
-          # Find latest release (same as "go install github.com/mailhog/MailHog@latest" in Dockerfile)
+          # Find latest release 
           VERSION="$( curl -s -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}"  "https://api.github.com/repos/mailhog/mailhog/releases/latest" | jq -r '.tag_name')"
           VERSION_DATE="$VERSION-$(date +'%Y-%m-%d')"
           
           GHCR_IMAGE=ghcr.io/${{ github.repository_owner }}/mailhog
           TAGS="${GHCR_IMAGE}:latest,${GHCR_IMAGE}:${VERSION},${GHCR_IMAGE}:${VERSION_DATE}"
           echo "TAGS=${TAGS}" | tee -a $GITHUB_ENV
+          echo "VERSION=${VERSION}" | tee -a $GITHUB_ENV
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v5
         with:
           context: .
+          build-args: VERSION=${{ env.VERSION }}
           push: true
           tags: ${{ env.TAGS }}
           labels: |
