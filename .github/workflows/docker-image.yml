@@ -31,6 +31,9 @@ jobs:
           TAGS="${GHCR_IMAGE}:latest,${GHCR_IMAGE}:${VERSION},${GHCR_IMAGE}:${VERSION_DATE}"
           echo "TAGS=${TAGS}" | tee -a $GITHUB_ENV
           echo "VERSION=${VERSION}" | tee -a $GITHUB_ENV
+          echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S')" | tee -a $GITHUB_ENV
+          echo "GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" | tee -a $GITHUB_ENV
+          echo "GIT_REF=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match)" | tee -a $GITHUB_ENV
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v5
